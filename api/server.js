@@ -17,7 +17,7 @@ import { setUpGitHubLogin } from './githubLogin';
 import { GitHubConnector } from './github/connector';
 import { Repositories, Users } from './github/models';
 import { Entries, Comments } from './sql/models';
-import { subscriptionManager } from './subscriptions';
+import { graphqlExecutor } from './subscriptions';
 
 import schema from './schema';
 import queryMap from '../extracted_queries.json';
@@ -146,11 +146,12 @@ export function run({
   // eslint-disable-next-line
   new SubscriptionServer(
     {
-      subscriptionManager,
+      schema,
+      executor: graphqlExecutor,
 
       // the onSubscribe function is called for every new subscription
       // and we use it to set the GraphQL context for this subscription
-      onSubscribe: (msg, params) => {
+      onRequest: (msg, params) => {
         const gitHubConnector = new GitHubConnector({
           clientId: GITHUB_CLIENT_ID,
           clientSecret: GITHUB_CLIENT_SECRET,
